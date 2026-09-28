@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel — Alleson</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#F5F4F0;color:#1a1a1a}
+.header{background:#1a1a1a;color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.header-title{font-size:18px;font-weight:600}
+.header-sub{font-size:12px;color:#aaa;margin-top:2px}
+.stats{display:flex;gap:8px}
+.stat{background:rgba(255,255,255,.1);border-radius:8px;padding:8px 16px;text-align:center}
+.stat-n{font-size:22px;font-weight:700;color:#C9A84C}
+.stat-l{font-size:10px;color:#aaa;text-transform:uppercase}
+.tabs-nav{background:#fff;border-bottom:1px solid #e8e8e8;display:flex;padding:0 24px;overflow-x:auto}
+.tab-nav{padding:12px 18px;border:none;background:transparent;font-size:13px;font-weight:500;cursor:pointer;color:#888;border-bottom:2px solid transparent;font-family:inherit;white-space:nowrap}
+.tab-nav.active{color:#1a1a1a;border-bottom-color:#C9A84C}
+.body{padding:16px 20px;max-width:980px;margin:0 auto}
+.tab-section{display:none}.tab-section.active{display:block}
+
+/* FILTROS */
+.filtros-top{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.filtro-btn{padding:6px 14px;border-radius:20px;border:1px solid #ddd;background:#fff;font-size:12px;cursor:pointer;color:#555}
+.filtro-btn.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.btn-add{margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:#C9A84C;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.filtros-avancados{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:14px;margin-bottom:16px}
+.filtros-avancados-title{font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.filtros-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.fi{display:flex;flex-direction:column;gap:4px}
+.fi label{font-size:11px;color:#888}
+.fi input,.fi select{padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;font-family:inherit;outline:none}
+.fi input:focus,.fi select:focus{border-color:#C9A84C}
+.filtros-actions{display:flex;gap:8px;margin-top:10px}
+.btn-filtrar{background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-limpar{background:none;border:1px solid #ddd;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;color:#555;font-family:inherit}
+.resultados-info{font-size:12px;color:#888;margin-bottom:12px}
+
+/* CARDS */
+.grid{display:grid;gap:14px}
+.card{background:#fff;border-radius:14px;border:1px solid #e8e8e8;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card.urgente{border-left:3px solid #E65100}
+.card.vip{border-left:3px solid #6A1B9A}
+.card.followup-hoje{border-left:3px solid #F59E0B;background:#FFFDF5}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:8px}
+.avatar{width:42px;height:42px;border-radius:50%;background:#C9A84C;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0}
+.card-info{flex:1;margin-left:12px}
+.card-nome{font-size:16px;font-weight:600}
+.card-tel{font-size:12px;color:#888;margin-top:2px}
+.card-followup{font-size:11px;color:#F59E0B;font-weight:600;margin-top:3px}
+.badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;white-space:nowrap}
+.bq{background:#FFF3E0;color:#E65100}.bv{background:#F3E5F5;color:#6A1B9A}.bm{background:#E3F2FD;color:#1565C0}.bn{background:#F5F5F5;color:#555}
+.perfil{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.pi{background:#F8F7F4;border-radius:8px;padding:8px 12px}
+.pl{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.pv{font-size:13px;font-weight:500}
+.full{grid-column:1/-1}
+.acoes{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding-top:14px;border-top:1px solid #f0f0f0}
+.btn-wa{display:inline-flex;align-items:center;gap:5px;background:#25D366;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none}
+.btn-sm{background:#f5f4f0;color:#555;border:1px solid #ddd;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.sel-status{padding:6px 8px;border:1px solid #ddd;border-radius:8px;font-size:12px;background:#fff;cursor:pointer;outline:none}
+
+/* OBS */
+.obs-box{margin-top:12px;display:none}
+.obs-box textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;min-height:60px;outline:none}
+.btn-salvar{background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer;font-weight:600;margin-top:6px;font-family:inherit}
+.obs-vis{background:#F8F7F4;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:12px;color:#555;border-left:3px solid #C9A84C}
+
+/* HISTÓRICO */
+.hist-box{margin-top:12px;display:none;border-top:1px solid #f0f0f0;padding-top:12px}
+.hist-title{font-size:12px;font-weight:600;color:#555;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.hist-form{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.hist-form select,.hist-form input{padding:6px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;font-family:inherit;outline:none}
+.hist-form select{min-width:120px}
+.hist-form input{flex:1;min-width:140px}
+.btn-hist{background:#C9A84C;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.hist-list{display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto}
+.hist-item{background:#F8F7F4;border-radius:8px;padding:8px 10px;font-size:12px}
+.hist-item-top{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.hist-tipo{font-weight:600;font-size:11px;padding:2px 8px;border-radius:20px}
+.ht-ligacao{background:#E3F2FD;color:#1565C0}
+.ht-visita{background:#E8F5E9;color:#1B5E20}
+.ht-mensagem{background:#FFF3E0;color:#E65100}
+.ht-proposta{background:#F3E5F5;color:#4A148C}
+.ht-outro{background:#F5F5F5;color:#555}
+.hist-data{font-size:11px;color:#999}
+.hist-nota{color:#444}
+
+/* FOLLOW-UP */
+.followup-row{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed #e8e8e8}
+.followup-label{font-size:11px;color:#888;white-space:nowrap}
+.followup-input{padding:5px 8px;border:1px solid #ddd;border-radius:8px;font-size:12px;font-family:inherit;outline:none}
+.followup-input:focus{border-color:#C9A84C}
+.btn-followup{background:#F59E0B;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+
+/* ALERTA FOLLOWUP */
+.alerta-bar{background:#FFF9E6;border:1px solid #F59E0B;border-radius:12px;padding:12px 16px;margin-bottom:16px;display:none}
+.alerta-title{font-size:13px;font-weight:600;color:#92400E;margin-bottom:8px}
+.alerta-list{display:flex;flex-direction:column;gap:6px}
+.alerta-item{display:flex;align-items:center;gap:10px;font-size:12px}
+.alerta-nome{font-weight:600}
+.alerta-data{color:#92400E}
+.alerta-wa{display:inline-flex;align-items:center;gap:4px;background:#25D366;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;text-decoration:none}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100;padding:16px}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:500px;padding:24px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:16px}
+.ia-box{background:#FFFDF0;border:1px solid #C9A84C;border-radius:10px;padding:14px;margin-bottom:16px}
+.ia-label{font-size:11px;font-weight:600;color:#9A7B2A;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.ia-box textarea{width:100%;padding:8px 10px;border:1px solid #D4B87A;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;min-height:65px;outline:none}
+.ia-btns{display:flex;align-items:center;gap:8px;margin-top:8px}
+.btn-ia{background:#C9A84C;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.ia-status{font-size:11px;color:#888}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fld{margin-bottom:12px}
+.fld label{font-size:12px;color:#666;display:block;margin-bottom:4px}
+.fld input,.fld select,.fld textarea{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:#C9A84C}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:16px;border-top:1px solid #f0f0f0}
+.btn-cancel{background:none;border:1px solid #ddd;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;font-family:inherit;color:#555}
+.btn-save{background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+
+/* CRUZAMENTO */
+.cruz-box{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:20px;margin-bottom:20px}
+.cruz-title{font-size:15px;font-weight:600;margin-bottom:6px}
+.cruz-sub{font-size:12px;color:#888;margin-bottom:12px}
+.api-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;background:#F8F7F4;border:1px solid #e8e8e8;border-radius:10px;padding:10px 14px}
+.api-row label{font-size:11px;color:#aaa;white-space:nowrap}
+.api-row input{flex:1;border:none;outline:none;font-size:12px;font-family:inherit;background:transparent}
+.btn-api-save{background:#1a1a1a;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:inherit}
+.cruz-input{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none;resize:vertical;min-height:80px;margin-bottom:10px}
+.cruz-input:focus{border-color:#C9A84C}
+.btn-cruz{background:#C9A84C;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.cruz-status{font-size:12px;color:#888;margin:10px 0;min-height:16px}
+.match-card{background:#F8F7F4;border-radius:10px;padding:14px;margin-bottom:10px;border-left:3px solid #C9A84C}
+.match-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px}
+.match-nome{font-size:14px;font-weight:600}
+.match-score{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+.score-alto{background:#E8F5E9;color:#2E7D32}.score-medio{background:#FFF3E0;color:#E65100}
+.match-motivo{font-size:12px;color:#555;margin-bottom:8px}
+.match-wa{display:inline-flex;align-items:center;gap:5px;background:#25D366;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none}
+
+/* ENCAMINHAR */
+.enc-sub{font-size:12px;color:#888;margin-bottom:12px}
+.enc-grid{display:grid;gap:8px;margin-bottom:16px}
+.enc-card{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.enc-card.sel{border-color:#C9A84C;background:#FFFDF5}
+.enc-chk{width:22px;height:22px;border-radius:6px;border:2px solid #ddd;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700}
+.enc-card.sel .enc-chk{background:#C9A84C;border-color:#C9A84C;color:#fff}
+.enc-nome{font-size:13px;font-weight:600}
+.enc-desc{font-size:11px;color:#888;margin-top:2px}
+.enc-actions{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:16px}
+.enc-label{font-size:12px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.enc-input{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:10px}
+.enc-btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn-copiar{background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-wa-enc{background:#25D366;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.enc-prev{background:#F8F7F4;border-radius:8px;padding:14px;margin-top:12px;font-size:12px;color:#444;white-space:pre-wrap;line-height:1.6;max-height:280px;overflow-y:auto;border-left:3px solid #C9A84C;display:none}
+.enc-count{font-size:12px;color:#C9A84C;font-weight:600;margin-bottom:10px}
+.btn-sel-all{background:none;border:1px solid #ddd;border-radius:8px;padding:5px 12px;font-size:11px;cursor:pointer;color:#555;font-family:inherit;margin-bottom:10px}
+.copiado{color:#25D366;font-size:12px;font-weight:600;display:none;margin-left:6px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">PAINEL DE CLIENTES</div>
+    <div class="header-sub">Alleson · Alto Padrão SP</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-n" id="st-n">12</div><div class="stat-l">Clientes</div></div>
+    <div class="stat"><div class="stat-n" style="color:#F59E0B" id="st-fu">0</div><div class="stat-l">Follow-up hoje</div></div>
+  </div>
+</div>
+
+<div class="tabs-nav">
+  <button class="tab-nav active" onclick="goTab('clientes',this)">👥 Clientes</button>
+  <button class="tab-nav" onclick="goTab('cruzamento',this)">🔍 Cruzamento</button>
+  <button class="tab-nav" onclick="goTab('encaminhar',this)">📤 Encaminhar</button>
+</div>
+
+<div class="body">
+
+  <!-- ABA CLIENTES -->
+  <div id="tab-clientes" class="tab-section active">
+
+    <!-- ALERTA FOLLOW-UP -->
+    <div class="alerta-bar" id="alerta-bar">
+      <div class="alerta-title">🔔 Follow-up de hoje</div>
+      <div class="alerta-list" id="alerta-list"></div>
+    </div>
+
+    <!-- FILTROS STATUS -->
+    <div class="filtros-top">
+      <button class="filtro-btn active" onclick="filtrar('todos',this)">Todos</button>
+      <button class="filtro-btn" onclick="filtrar('quente',this)">🔥 Quente</button>
+      <button class="filtro-btn" onclick="filtrar('vip',this)">⭐ VIP</button>
+      <button class="filtro-btn" onclick="filtrar('morno',this)">🌤 Morno</button>
+      <button class="filtro-btn" onclick="filtrar('novo',this)">Novo</button>
+      <button class="filtro-btn" onclick="filtrar('followup',this)">📅 Follow-up</button>
+      <button class="btn-add" onclick="abrirModal()">+ Novo cliente</button>
+    </div>
+
+    <!-- FILTROS AVANÇADOS -->
+    <div class="filtros-avancados">
+      <div class="filtros-avancados-title">
+        <span>🔎 Filtro avançado</span>
+        <button class="btn-limpar" onclick="limparFiltros()" style="font-size:11px;padding:3px 10px">Limpar</button>
+      </div>
+      <div class="filtros-grid">
+        <div class="fi">
+          <label>Bairro / Região</label>
+          <input id="fi-bairro" placeholder="Ex: Brooklin" oninput="aplicarFiltros()"/>
+        </div>
+        <div class="fi">
+          <label>Valor máximo (M)</label>
+          <select id="fi-valor" onchange="aplicarFiltros()">
+            <option value="">Qualquer</option>
+            <option value="1.5">até R$ 1,5M</option>
+            <option value="2">até R$ 2M</option>
+            <option value="2.5">até R$ 2,5M</option>
+            <option value="3">até R$ 3M</option>
+            <option value="4">até R$ 4M</option>
+            <option value="5">até R$ 5M</option>
+            <option value="99">acima de R$ 5M</option>
+          </select>
+        </div>
+        <div class="fi">
+          <label>Suítes mínimo</label>
+          <select id="fi-suites" onchange="aplicarFiltros()">
+            <option value="">Qualquer</option>
+            <option value="1">1+</option>
+            <option value="2">2+</option>
+            <option value="3">3+</option>
+            <option value="4">4+</option>
+          </select>
+        </div>
+        <div class="fi">
+          <label>Metragem mínima (m²)</label>
+          <input id="fi-mmin" type="number" placeholder="Ex: 120" oninput="aplicarFiltros()"/>
+        </div>
+        <div class="fi">
+          <label>Estágio</label>
+          <select id="fi-estagio" onchange="aplicarFiltros()">
+            <option value="">Qualquer</option>
+            <option value="Pronto">Pronto</option>
+            <option value="Lançamento">Lançamento</option>
+            <option value="Construção">Construção</option>
+            <option value="Reformado">Reformado</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="resultados-info" id="resultados-info"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <!-- ABA CRUZAMENTO -->
+  <div id="tab-cruzamento" class="tab-section">
+    <div class="cruz-box">
+      <div class="cruz-title">🔍 Cruzamento de Imóvel</div>
+      <div class="cruz-sub">Cole o link de um imóvel ou descreva as características. A IA cruza com todos os seus clientes e mostra quem bate.</div>
+      <div class="api-row">
+        <label>Chave API:</label>
+        <input type="password" id="api-key-inp" placeholder="sk-ant-..."/>
+        <button class="btn-api-save" onclick="salvarKey()">Salvar</button>
+        <span id="api-key-status" style="font-size:11px;color:#25D366;display:none;margin-left:4px">✓ Salva</span>
+      </div>
+      <textarea class="cruz-input" id="cruz-input" placeholder="Cole o link do imóvel ou descreva: ex. Apto 180m², 3 suítes, 2 vagas, Campo Belo, R$ 2,8M, pronto..."></textarea>
+      <button class="btn-cruz" onclick="cruzar()">Cruzar com clientes</button>
+      <div class="cruz-status" id="cruz-status"></div>
+      <div id="cruz-resultado"></div>
+    </div>
+  </div>
+
+  <!-- ABA ENCAMINHAR -->
+  <div id="tab-encaminhar" class="tab-section">
+    <div class="enc-sub">Selecione os clientes e envie o perfil para outro corretor</div>
+    <button class="btn-sel-all" onclick="selAll()">Selecionar / desmarcar todos</button>
+    <div class="enc-count" id="enc-count">Nenhum selecionado</div>
+    <div class="enc-grid" id="enc-grid"></div>
+    <div class="enc-actions">
+      <div class="enc-label">Enviar para corretor</div>
+      <input class="enc-input" id="enc-nome" placeholder="Nome do corretor (opcional)" oninput="atualizarPrev()"/>
+      <input class="enc-input" id="enc-tel" placeholder="WhatsApp do corretor (ex: 11999990000)"/>
+      <div class="enc-btns">
+        <button class="btn-copiar" onclick="copiar()">📋 Copiar texto</button>
+        <button class="btn-wa-enc" onclick="enviarWA()">💬 WhatsApp</button>
+        <span class="copiado" id="copiado">✓ Copiado!</span>
+      </div>
+      <div class="enc-prev" id="enc-prev"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL NOVO CLIENTE -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Novo cliente</div>
+    <div class="ia-box">
+      <div class="ia-label">✨ Descrever com IA</div>
+      <textarea id="ia-desc" placeholder='Ex: "João quer comprar apto 3 suítes no Brooklin, até 2M, pronto"'></textarea>
+      <div class="ia-btns">
+        <button class="btn-ia" onclick="preencherIA()">Preencher campos</button>
+        <span class="ia-status" id="ia-status"></span>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fld"><label>Nome</label><input id="f-nome" placeholder="Nome do cliente"/></div>
+      <div class="fld"><label>Telefone</label><input id="f-tel" placeholder="11 99999-0000"/></div>
+    </div>
+    <div class="frow">
+      <div class="fld"><label>Finalidade</label><select id="f-inv"><option>Comprar</option><option>Alugar</option></select></div>
+      <div class="fld"><label>Estágio</label><select id="f-est"><option>Qualquer</option><option>Pronto</option><option>Lançamento</option><option>Construção</option><option>Contrapiso</option><option>Reformado</option></select></div>
+    </div>
+    <div class="fld"><label>Tipo</label><input id="f-tipo" placeholder="Apartamento, Casa, Cobertura..."/></div>
+    <div class="fld"><label>Bairros de interesse</label><input id="f-bairros" placeholder="Brooklin, Campo Belo..."/></div>
+    <div class="frow">
+      <div class="fld"><label>Valor</label><input id="f-valor" placeholder="R$ 2,5M"/></div>
+      <div class="fld"><label>Suítes</label><input id="f-suites" type="number" placeholder="3"/></div>
+    </div>
+    <div class="frow">
+      <div class="fld"><label>Metragem mín (m²)</label><input id="f-mmin" type="number" placeholder="130"/></div>
+      <div class="fld"><label>Vagas</label><input id="f-vagas" type="number" placeholder="2"/></div>
+    </div>
+    <div class="fld"><label>Observações</label><textarea id="f-obs" rows="2" placeholder="Permuta, urgência, detalhes..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-save" onclick="salvarCliente()">Salvar cliente</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var PROXY = "https://plain-frost-fc84.alison-lima.workers.dev";
+var HOJE = new Date().toISOString().slice(0,10);
+
+var CLIENTES = [
+  {id:1,  nome:"Rodrigo Porto",     tel:"11996041371",   tipo:"Apartamento",                    bairros:"Brooklin",                                                                                              estagio:"Pronto",     suites:3,vagas:2,   valor:"R$ 3,2M",             vnum:3.2, mmin:140,mmax:170,status:"quente",obs:"",followup:"",hist:[]},
+  {id:2,  nome:"Ana",               tel:"11986818690",   tipo:"Apartamento",                    bairros:"Brooklin ou Campo Belo",                                                                                 estagio:"Pronto",     suites:3,vagas:2,   valor:"até R$ 2,9M",         vnum:2.9, mmin:130,mmax:null,status:"quente",obs:"",followup:"",hist:[]},
+  {id:3,  nome:"Delma",             tel:"5582960799993", tipo:"Apartamento",                    bairros:"Jardins ou região próxima",                                                                              estagio:"Qualquer",   suites:3,vagas:null,valor:"R$ 5M a 6M",           vnum:6,   mmin:180,mmax:null,status:"vip",   obs:"",followup:"",hist:[]},
+  {id:4,  nome:"Fabrício",          tel:"11996761008",   tipo:"Apartamento reformado",          bairros:"Moema, Brooklin, Campo Belo, Itaim, Vila Nova, Vila Olímpia, Jardim Paulista, Jardim América, Pinheiros",estagio:"Reformado",  suites:null,vagas:null,valor:"R$ 2M a 2,3M",       vnum:2.3, mmin:150,mmax:170,status:"quente",obs:"",followup:"",hist:[]},
+  {id:5,  nome:"Sérgio",            tel:"11994503316",   tipo:"Apartamento",                    bairros:"Brooklin",                                                                                              estagio:"Qualquer",   suites:3,vagas:null,valor:"R$ 3,5M com permuta",  vnum:3.5, mmin:170,mmax:null,status:"quente",obs:"Permuta: Magna Morumbi ~R$ 1,6M a 1,8M.",followup:"",hist:[]},
+  {id:6,  nome:"Eduardo",           tel:"17867975777",   tipo:"Apartamento",                    bairros:"Brooklin",                                                                                              estagio:"Pronto novo",suites:3,vagas:null,valor:"~R$ 15.000/m²",       vnum:2.7, mmin:120,mmax:180,status:"quente",obs:"Pronto e novo. ~R$ 15.000/m². 2 ou 3 suítes.",followup:"",hist:[]},
+  {id:7,  nome:"Ricardo",           tel:"19992974000",   tipo:"Apartamento",                    bairros:"A definir",                                                                                             estagio:"Qualquer",   suites:3,vagas:3,   valor:"R$ 3M a 4M",          vnum:4,   mmin:null,mmax:null,status:"quente",obs:"3 suítes, mínimo 3 vagas. Bairro ainda não informado.",followup:"",hist:[]},
+  {id:8,  nome:"Rodrigo Fracaroli", tel:"17981184422",   tipo:"Apartamento",                    bairros:"Brooklin",                                                                                              estagio:"Qualquer",   suites:3,vagas:2,   valor:"R$ 4M com permuta",   vnum:4,   mmin:180,mmax:null,status:"quente",obs:"Permuta: flat na Vila Nova Conceição ~R$ 600K.",followup:"",hist:[]},
+  {id:9,  nome:"F.R.",              tel:"11988004818",   tipo:"Casa de condomínio ou Cobertura",bairros:"Brooklin, Campo Belo ou Alto da Boa Vista",                                                             estagio:"Pronto",     suites:3,vagas:null,valor:"Ideal R$ 4M (até 5M)",vnum:5,   mmin:null,mmax:null,status:"vip",   obs:"Tem imóvel em contrapiso para vender (2028) — captação.",followup:"",hist:[]},
+  {id:10, nome:"Rose",              tel:"11971129275",   tipo:"Apartamento",                    bairros:"Vila Mariana, Brooklin ou Paraíso",                                                                      estagio:"Qualquer",   suites:3,vagas:null,valor:"até R$ 2M",          vnum:2,   mmin:120,mmax:null,status:"quente",obs:"2 ou 3 dormitórios.",followup:"",hist:[]},
+  {id:11, nome:"Luciana",           tel:"11996379067",   tipo:"Apartamento",                    bairros:"Moema, Campo Belo, Brooklin ou Vila Olímpia",                                                           estagio:"Pronto",     suites:3,vagas:null,valor:"até R$ 1,5M",       vnum:1.5, mmin:null,mmax:null,status:"quente",obs:"",followup:"",hist:[]},
+  {id:12, nome:"Bruno",             tel:"11954369126",   tipo:"Apartamento",                    bairros:"Campo Belo, Brooklin ou Moema",                                                                         estagio:"Pronto",     suites:3,vagas:null,valor:"até R$ 2,5M",       vnum:2.5, mmin:150,mmax:null,status:"quente",obs:"",followup:"",hist:[]}
+];
+
+var nextId = 13;
+var filtroAtual = "todos";
+var selecionados = {};
+var editId = null;
+
+// PERSISTÊNCIA
+function getKey(){ return localStorage.getItem("noah_api_key")||""; }
+function salvarKey(){ var v=document.getElementById("api-key-inp").value.trim(); if(!v)return; localStorage.setItem("noah_api_key",v); var s=document.getElementById("api-key-status"); s.style.display="inline"; setTimeout(function(){s.style.display="none";},2000); }
+
+function loadSaved(){
+  CLIENTES.forEach(function(c){
+    var s=localStorage.getItem("cli_"+c.id);
+    if(s){ var d=JSON.parse(s); c.status=d.status||c.status; c.obs=d.obs||c.obs; c.followup=d.followup||""; c.hist=d.hist||[]; }
+  });
+  var k=localStorage.getItem("noah_api_key");
+  if(k) document.getElementById("api-key-inp").value=k;
+}
+
+function saveCli(id){
+  var c=CLIENTES.filter(function(x){return x.id===id;})[0];
+  if(c) localStorage.setItem("cli_"+id,JSON.stringify({status:c.status,obs:c.obs,followup:c.followup,hist:c.hist}));
+}
+
+// UTILS
+function ini(n){ return n.split(" ").map(function(w){return w[0];}).join("").slice(0,2).toUpperCase(); }
+function bcls(s){ return {quente:"bq",vip:"bv",morno:"bm",novo:"bn"}[s]||"bn"; }
+function blbl(s){ return {quente:"🔥 Quente",vip:"⭐ VIP",morno:"🌤 Morno",novo:"Novo"}[s]||s; }
+function ftel(t){ var n=t.replace(/[^0-9]/g,""); if(n.length===11) return "("+n.slice(0,2)+") "+n.slice(2,7)+"-"+n.slice(7); return t; }
+function fdata(d){ if(!d)return ""; var p=d.split("-"); return p[2]+"/"+p[1]+"/"+p[0]; }
+function hoje(){ return new Date().toISOString().slice(0,10); }
+
+function goTab(tab,btn){
+  document.querySelectorAll(".tab-nav").forEach(function(b){b.classList.remove("active");});
+  btn.classList.add("active");
+  document.querySelectorAll(".tab-section").forEach(function(s){s.classList.remove("active");});
+  document.getElementById("tab-"+tab).classList.add("active");
+  if(tab==="encaminhar") renderEnc();
+}
+
+// FILTROS
+var filtrosAtivos = {};
+function filtrar(f,btn){
+  filtroAtual=f;
+  document.querySelectorAll(".filtro-btn").forEach(function(b){b.classList.remove("active");});
+  btn.classList.add("active");
+  render();
+}
+
+function aplicarFiltros(){ render(); }
+
+function limparFiltros(){
+  document.getElementById("fi-bairro").value="";
+  document.getElementById("fi-valor").value="";
+  document.getElementById("fi-suites").value="";
+  document.getElementById("fi-mmin").value="";
+  document.getElementById("fi-estagio").value="";
+  render();
+}
+
+function getFiltrados(){
+  var bairro=(document.getElementById("fi-bairro").value||"").toLowerCase().trim();
+  var valor=parseFloat(document.getElementById("fi-valor").value)||0;
+  var suites=parseInt(document.getElementById("fi-suites").value)||0;
+  var mmin=parseInt(document.getElementById("fi-mmin").value)||0;
+  var estagio=(document.getElementById("fi-estagio").value||"").toLowerCase();
+
+  return CLIENTES.filter(function(c){
+    if(filtroAtual==="quente"&&c.status!=="quente") return false;
+    if(filtroAtual==="vip"&&c.status!=="vip") return false;
+    if(filtroAtual==="morno"&&c.status!=="morno") return false;
+    if(filtroAtual==="novo"&&c.status!=="novo") return false;
+    if(filtroAtual==="followup"&&(!c.followup||c.followup<hoje())) return false;
+    if(bairro&&!c.bairros.toLowerCase().includes(bairro)) return false;
+    if(valor&&c.vnum&&c.vnum>valor) return false;
+    if(suites&&c.suites&&c.suites<suites) return false;
+    if(mmin&&c.mmin&&c.mmin<mmin) return false;
+    if(estagio&&!c.estagio.toLowerCase().includes(estagio)) return false;
+    return true;
+  });
+}
+
+// ALERTAS FOLLOW-UP
+function renderAlertas(){
+  var hj=hoje();
+  var vencidos=CLIENTES.filter(function(c){return c.followup&&c.followup<=hj;});
+  var bar=document.getElementById("alerta-bar");
+  var fuCount=document.getElementById("st-fu");
+  fuCount.textContent=vencidos.length;
+  if(!vencidos.length){bar.style.display="none";return;}
+  bar.style.display="block";
+  document.getElementById("alerta-list").innerHTML=vencidos.map(function(c){
+    return '<div class="alerta-item">'+
+      '<span class="alerta-nome">'+c.nome+'</span>'+
+      '<span class="alerta-data">'+(c.followup===hj?"hoje":"venceu "+fdata(c.followup))+'</span>'+
+      '<a class="alerta-wa" href="https://wa.me/55'+c.tel+'" target="_blank">💬 Ligar/WA</a>'+
+    '</div>';
+  }).join("");
+}
+
+// RENDER CLIENTES
+function render(){
+  var lista=getFiltrados();
+  var grid=document.getElementById("grid");
+  document.getElementById("st-n").textContent=CLIENTES.length;
+  document.getElementById("resultados-info").textContent=lista.length===CLIENTES.length?"Exibindo todos os "+CLIENTES.length+" clientes":"Exibindo "+lista.length+" de "+CLIENTES.length+" clientes";
+  renderAlertas();
+  if(!lista.length){grid.innerHTML='<div style="text-align:center;padding:60px;color:#aaa;font-size:14px">Nenhum cliente encontrado com esse filtro.</div>';return;}
+
+  var hj=hoje();
+  grid.innerHTML=lista.map(function(c){
+    var cc="card"+(c.followup&&c.followup<=hj?" followup-hoje":c.status==="vip"?" vip":c.status==="quente"?" urgente":"");
+    var fuMsg=c.followup?(c.followup<=hj?"🔔 Follow-up: "+fdata(c.followup):"📅 Retornar em: "+fdata(c.followup)):"";
+    var histHtml="";
+    if(c.hist&&c.hist.length){
+      var ult=c.hist[c.hist.length-1];
+      var tipoCls={"Ligação":"ht-ligacao","Visita":"ht-visita","Mensagem":"ht-mensagem","Proposta":"ht-proposta"}[ult.tipo]||"ht-outro";
+      histHtml='<div class="pi full" style="margin-top:0"><div class="pl">Último contato</div><div class="pv" style="display:flex;align-items:center;gap:6px"><span class="hist-tipo '+tipoCls+'">'+ult.tipo+'</span><span style="font-size:11px;color:#888">'+fdata(ult.data)+'</span><span style="font-size:12px;color:#555">'+ult.nota+'</span></div></div>';
+    }
+    return '<div class="'+cc+'" id="card-'+c.id+'">'+
+      '<div class="card-top">'+
+        '<div class="avatar">'+ini(c.nome)+'</div>'+
+        '<div class="card-info">'+
+          '<div class="card-nome">'+c.nome+'</div>'+
+          '<div class="card-tel">'+ftel(c.tel)+'</div>'+
+          (fuMsg?'<div class="card-followup">'+fuMsg+'</div>':'')+
+        '</div>'+
+        '<span class="badge '+bcls(c.status)+'">'+blbl(c.status)+'</span>'+
+      '</div>'+
+      '<div class="perfil">'+
+        '<div class="pi"><div class="pl">Valor</div><div class="pv">'+c.valor+'</div></div>'+
+        '<div class="pi"><div class="pl">Metragem</div><div class="pv">'+(c.mmin?c.mmin+"m²"+(c.mmax?" a "+c.mmax+"m²":"+"): "—")+'</div></div>'+
+        '<div class="pi"><div class="pl">Suítes / Vagas</div><div class="pv">'+(c.suites?c.suites+" suítes":"—")+(c.vagas?" · "+c.vagas+" vagas":"")+'</div></div>'+
+        '<div class="pi"><div class="pl">Estágio</div><div class="pv">'+c.estagio+'</div></div>'+
+        '<div class="pi full"><div class="pl">Bairros</div><div class="pv">'+c.bairros+'</div></div>'+
+        (c.obs?'<div class="pi full obs-vis" id="ov-'+c.id+'"><div class="pl">Observações</div><div class="pv">'+c.obs+'</div></div>':'<div id="ov-'+c.id+'"></div>')+
+        histHtml+
+      '</div>'+
+      '<div class="acoes">'+
+        '<a class="btn-wa" href="https://wa.me/55'+c.tel+'" target="_blank">💬 WA</a>'+
+        '<button class="btn-sm" onclick="togHist('+c.id+')">📋 Histórico</button>'+
+        '<button class="btn-sm" onclick="togObs('+c.id+')">📝 Obs</button>'+
+        '<button class="btn-sm" onclick="abrirEdit('+c.id+')">✏️</button>'+
+        '<select class="sel-status" onchange="chgStatus('+c.id+',this.value)">'+
+          '<option value="novo"'+(c.status==="novo"?" selected":"")+'>Novo</option>'+
+          '<option value="morno"'+(c.status==="morno"?" selected":"")+'>🌤 Morno</option>'+
+          '<option value="quente"'+(c.status==="quente"?" selected":"")+'>🔥 Quente</option>'+
+          '<option value="vip"'+(c.status==="vip"?" selected":"")+'>⭐ VIP</option>'+
+        '</select>'+
+      '</div>'+
+      '<div class="followup-row">'+
+        '<span class="followup-label">📅 Follow-up:</span>'+
+        '<input type="date" class="followup-input" id="fu-'+c.id+'" value="'+(c.followup||'')+'" onchange="salvarFollowup('+c.id+')"/>'+
+        '<button class="btn-followup" onclick="salvarFollowup('+c.id+')">OK</button>'+
+        (c.followup?'<button class="btn-limpar" onclick="limparFollowup('+c.id+')" style="font-size:11px;padding:3px 8px">Limpar</button>':'')+
+      '</div>'+
+      '<div class="hist-box" id="hb-'+c.id+'">'+
+        '<div class="hist-title"><span>Histórico de contatos</span></div>'+
+        '<div class="hist-form">'+
+          '<select id="ht-tipo-'+c.id+'"><option>Ligação</option><option>Mensagem</option><option>Visita</option><option>Proposta</option><option>Outro</option></select>'+
+          '<input type="date" id="ht-data-'+c.id+'" value="'+hoje()+'"/>'+
+          '<input id="ht-nota-'+c.id+'" placeholder="O que aconteceu?"/>'+
+          '<button class="btn-hist" onclick="addHist('+c.id+')">+ Registrar</button>'+
+        '</div>'+
+        '<div class="hist-list" id="hl-'+c.id+'">'+renderHistList(c)+'</div>'+
+      '</div>'+
+      '<div class="obs-box" id="ob-'+c.id+'">'+
+        '<textarea id="ot-'+c.id+'" placeholder="Anotações...">'+(c.obs||'')+'</textarea>'+
+        '<button class="btn-salvar" onclick="salvObs('+c.id+')">Salvar</button>'+
+      '</div>'+
+    '</div>';
+  }).join("");
+}
+
+function renderHistList(c){
+  if(!c.hist||!c.hist.length) return '<div style="font-size:12px;color:#aaa;padding:6px 0">Nenhum contato registrado ainda.</div>';
+  return c.hist.slice().reverse().map(function(h){
+    var tipoCls={"Ligação":"ht-ligacao","Visita":"ht-visita","Mensagem":"ht-mensagem","Proposta":"ht-proposta"}[h.tipo]||"ht-outro";
+    return '<div class="hist-item">'+
+      '<div class="hist-item-top">'+
+        '<span class="hist-tipo '+tipoCls+'">'+h.tipo+'</span>'+
+        '<span class="hist-data">'+fdata(h.data)+'</span>'+
+      '</div>'+
+      '<div class="hist-nota">'+h.nota+'</div>'+
+    '</div>';
+  }).join("");
+}
+
+function togObs(id){ var b=document.getElementById("ob-"+id); b.style.display=b.style.display==="block"?"none":"block"; if(b.style.display==="block") document.getElementById("ot-"+id).focus(); }
+function salvObs(id){ var c=CLIENTES.filter(function(x){return x.id===id;})[0]; c.obs=document.getElementById("ot-"+id).value; saveCli(id); var el=document.getElementById("ov-"+id); if(c.obs){el.className="pi full obs-vis";el.innerHTML='<div class="pl">Observações</div><div class="pv">'+c.obs+'</div>';}else{el.className="";el.innerHTML="";} document.getElementById("ob-"+id).style.display="none"; }
+function chgStatus(id,val){ var c=CLIENTES.filter(function(x){return x.id===id;})[0]; c.status=val; saveCli(id); render(); }
+
+function salvarFollowup(id){
+  var c=CLIENTES.filter(function(x){return x.id===id;})[0];
+  c.followup=document.getElementById("fu-"+id).value;
+  saveCli(id);
+  render();
+}
+function limparFollowup(id){ var c=CLIENTES.filter(function(x){return x.id===id;})[0]; c.followup=""; saveCli(id); render(); }
+
+function togHist(id){ var b=document.getElementById("hb-"+id); b.style.display=b.style.display==="block"?"none":"block"; }
+
+function addHist(id){
+  var c=CLIENTES.filter(function(x){return x.id===id;})[0];
+  var tipo=document.getElementById("ht-tipo-"+id).value;
+  var data=document.getElementById("ht-data-"+id).value;
+  var nota=document.getElementById("ht-nota-"+id).value.trim();
+  if(!nota){alert("Digite o que aconteceu.");return;}
+  if(!c.hist) c.hist=[];
+  c.hist.push({tipo:tipo,data:data,nota:nota});
+  saveCli(id);
+  document.getElementById("hl-"+id).innerHTML=renderHistList(c);
+  document.getElementById("ht-nota-"+id).value="";
+  render();
+}
+
+// MODAL
+function abrirModal(){ editId=null; document.getElementById("modal-title").textContent="Novo cliente"; limparForm(); document.getElementById("overlay").classList.add("open"); }
+function abrirEdit(id){ editId=id; var c=CLIENTES.filter(function(x){return x.id===id;})[0]; document.getElementById("modal-title").textContent="Editar "+c.nome; document.getElementById("f-nome").value=c.nome; document.getElementById("f-tel").value=c.tel; document.getElementById("f-est").value=c.estagio; document.getElementById("f-tipo").value=c.tipo; document.getElementById("f-bairros").value=c.bairros; document.getElementById("f-valor").value=c.valor; document.getElementById("f-suites").value=c.suites||""; document.getElementById("f-mmin").value=c.mmin||""; document.getElementById("f-vagas").value=c.vagas||""; document.getElementById("f-obs").value=c.obs||""; document.getElementById("overlay").classList.add("open"); }
+function fecharModal(){ document.getElementById("overlay").classList.remove("open"); }
+function limparForm(){ ["f-nome","f-tel","f-tipo","f-bairros","f-valor","f-suites","f-mmin","f-vagas","f-obs","ia-desc"].forEach(function(id){document.getElementById(id).value="";}); document.getElementById("ia-status").textContent=""; }
+
+function salvarCliente(){
+  var nome=document.getElementById("f-nome").value.trim();
+  if(!nome){alert("Digite o nome.");return;}
+  var dados={nome:nome,tel:document.getElementById("f-tel").value.replace(/[^0-9]/g,""),inv:document.getElementById("f-inv").value,estagio:document.getElementById("f-est").value,tipo:document.getElementById("f-tipo").value||"Apartamento",bairros:document.getElementById("f-bairros").value,valor:document.getElementById("f-valor").value,vnum:0,suites:parseInt(document.getElementById("f-suites").value)||null,mmin:parseInt(document.getElementById("f-mmin").value)||null,mmax:null,vagas:parseInt(document.getElementById("f-vagas").value)||null,obs:document.getElementById("f-obs").value,status:"quente",followup:"",hist:[]};
+  if(editId){ var c=CLIENTES.filter(function(x){return x.id===editId;})[0]; Object.assign(c,dados); }
+  else{ dados.id=nextId++; CLIENTES.push(dados); }
+  fecharModal(); render();
+}
+
+async function preencherIA(){
+  var desc=document.getElementById("ia-desc").value.trim();
+  if(!desc){alert("Digite a descrição.");return;}
+  var key=getKey();
+  if(!key){alert("Salve sua chave API na aba Cruzamento primeiro.");return;}
+  var st=document.getElementById("ia-status");
+  st.textContent="Analisando...";
+  try{
+    var resp=await fetch(PROXY,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({apiKey:key,model:"claude-sonnet-4-6",max_tokens:800,messages:[{role:"user",content:'Extraia dados deste perfil e retorne SOMENTE JSON sem markdown:\n"'+desc+'"\n{"nome":"","tel":"","estagio":"Pronto ou Lançamento ou Construção ou Contrapiso ou Reformado ou Qualquer","tipo":"","bairros":"","valor":"","suites":null,"mmin":null,"vagas":null,"obs":""}'}]})});
+    var data=await resp.json();
+    var p=JSON.parse(data.content[0].text.replace(/```json|```/g,"").trim());
+    if(p.nome) document.getElementById("f-nome").value=p.nome;
+    if(p.tel) document.getElementById("f-tel").value=p.tel;
+    if(p.estagio) document.getElementById("f-est").value=p.estagio;
+    if(p.tipo) document.getElementById("f-tipo").value=p.tipo;
+    if(p.bairros) document.getElementById("f-bairros").value=p.bairros;
+    if(p.valor) document.getElementById("f-valor").value=p.valor;
+    if(p.suites) document.getElementById("f-suites").value=p.suites;
+    if(p.mmin) document.getElementById("f-mmin").value=p.mmin;
+    if(p.vagas) document.getElementById("f-vagas").value=p.vagas;
+    if(p.obs) document.getElementById("f-obs").value=p.obs;
+    st.style.color="#25D366"; st.textContent="✓ Preenchido!";
+    setTimeout(function(){st.textContent="";},3000);
+  }catch(e){st.style.color="#E65100";st.textContent="Erro: "+e.message;}
+}
+
+// CRUZAMENTO
+async function cruzar(){
+  var input=document.getElementById("cruz-input").value.trim();
+  if(!input){alert("Descreva o imóvel.");return;}
+  var key=getKey();
+  if(!key){alert("Salve sua chave API acima.");return;}
+  var st=document.getElementById("cruz-status");
+  var res=document.getElementById("cruz-resultado");
+  st.textContent="Analisando e cruzando com clientes...";
+  res.innerHTML="";
+  var perfis=CLIENTES.map(function(c,i){return (i+1)+". "+c.nome+" | "+c.bairros+" | "+c.valor+" | "+(c.suites?c.suites+" suítes":"")+(c.mmin?" mín "+c.mmin+"m²":"")+" | "+c.estagio+(c.obs?" | "+c.obs:"");}).join("\n");
+  try{
+    var resp=await fetch(PROXY,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({apiKey:key,model:"claude-sonnet-4-6",max_tokens:2000,messages:[{role:"user",content:'Você é especialista em imóveis de alto padrão em São Paulo.\n\nIMÓVEL:\n'+input+'\n\nCLIENTES:\n'+perfis+'\n\nQuais clientes têm perfil compatível? Retorne SOMENTE JSON:\n{"matches":[{"cliente_nome":"","score":"alto ou medio","motivo":"1 frase","mensagem_wa":"mensagem WhatsApp natural e personalizada"}]}'}]})});
+    var data=await resp.json();
+    var result=JSON.parse(data.content[0].text.replace(/```json|```/g,"").trim());
+    var matches=result.matches||[];
+    if(!matches.length){st.textContent="Nenhum cliente compatível.";return;}
+    st.textContent=matches.length+" cliente(s) compatível(is)";
+    res.innerHTML=matches.map(function(m){
+      var c=CLIENTES.filter(function(x){return x.nome===m.cliente_nome;})[0];
+      var tel=c?c.tel:"";
+      var href=tel?"https://wa.me/55"+tel+"?text="+encodeURIComponent(m.mensagem_wa):"#";
+      return '<div class="match-card">'+
+        '<div class="match-header"><div class="match-nome">'+m.cliente_nome+'</div><span class="match-score '+(m.score==="alto"?"score-alto":"score-medio")+'">'+(m.score==="alto"?"✓ Excelente":"~ Bom match")+'</span></div>'+
+        '<div class="match-motivo">'+m.motivo+'</div>'+
+        '<a class="match-wa" href="'+href+'" target="_blank">💬 Enviar WhatsApp</a>'+
+      '</div>';
+    }).join("");
+  }catch(e){st.textContent="Erro: "+e.message;}
+}
+
+// ENCAMINHAR
+function renderEnc(){
+  var g=document.getElementById("enc-grid");
+  g.innerHTML=CLIENTES.map(function(c){
+    var sel=selecionados[c.id];
+    return '<div class="enc-card'+(sel?" sel":"")+'" onclick="togSel('+c.id+')">'+
+      '<div class="enc-chk">'+(sel?"✓":"")+'</div>'+
+      '<div style="flex:1"><div class="enc-nome">'+c.nome+'</div><div class="enc-desc">'+c.bairros+" · "+c.valor+(c.suites?" · "+c.suites+" suítes":"")+(c.mmin?" · mín "+c.mmin+"m²":"")+'</div></div>'+
+      '<span class="badge '+bcls(c.status)+'" style="font-size:10px">'+blbl(c.status)+'</span>'+
+    '</div>';
+  }).join("");
+  var n=Object.keys(selecionados).filter(function(k){return selecionados[k];}).length;
+  document.getElementById("enc-count").textContent=n>0?n+" cliente(s) selecionado(s)":"Nenhum selecionado";
+  atualizarPrev();
+}
+function togSel(id){selecionados[id]=!selecionados[id];renderEnc();}
+function selAll(){var n=Object.keys(selecionados).filter(function(k){return selecionados[k];}).length;if(n===CLIENTES.length){selecionados={};}else{CLIENTES.forEach(function(c){selecionados[c.id]=true;});}renderEnc();}
+function gerarTexto(){var corretor=document.getElementById("enc-nome").value.trim();var lista=CLIENTES.filter(function(c){return selecionados[c.id];});if(!lista.length)return "";var txt=corretor?"Olá "+corretor+"! Segue o perfil dos clientes que estou encaminhando:\n\n":"Perfil dos clientes encaminhados:\n\n";lista.forEach(function(c,i){txt+="*Cliente "+(i+1)+": "+c.nome+"*\n📍 "+c.bairros+"\n💰 "+c.valor+"\n🏠 "+c.tipo+"\n"+(c.suites?"🛏 "+c.suites+" suítes\n":"")+(c.vagas?"🚗 "+c.vagas+" vagas\n":"")+(c.mmin?"📐 mín "+c.mmin+"m²\n":"")+(c.estagio&&c.estagio!=="Qualquer"?"🏗 "+c.estagio+"\n":"")+(c.obs?"📝 "+c.obs+"\n":"")+"📱 "+ftel(c.tel)+"\n"+(i<lista.length-1?"\n---\n\n":"");});return txt;}
+function atualizarPrev(){var txt=gerarTexto();var p=document.getElementById("enc-prev");if(txt){p.style.display="block";p.textContent=txt;}else p.style.display="none";}
+function copiar(){var txt=gerarTexto();if(!txt){alert("Selecione ao menos um cliente.");return;}navigator.clipboard.writeText(txt).then(function(){var m=document.getElementById("copiado");m.style.display="inline";setTimeout(function(){m.style.display="none";},2500);});}
+function enviarWA(){var tel=document.getElementById("enc-tel").value.replace(/[^0-9]/g,"");var txt=gerarTexto();if(!txt){alert("Selecione ao menos um cliente.");return;}if(!tel){alert("Digite o WhatsApp do corretor.");return;}window.open("https://wa.me/55"+tel+"?text="+encodeURIComponent(txt),"_blank");}
+
+document.getElementById("overlay").addEventListener("click",function(e){if(e.target===this)fecharModal();});
+loadSaved();
+render();
+</script>
+</body>
+</html>
